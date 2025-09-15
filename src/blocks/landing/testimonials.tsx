@@ -35,8 +35,11 @@ export function Testimonials({
               loading="lazy"
             />
           </div>
+          <h3 className="sr-only">
+            {name}, {role}
+          </h3>
           <div className="space-y-px">
-            <p className="text-sm font-medium">{name}</p>
+            <p className="text-sm font-medium">{name} </p>
             <p className="text-muted-foreground text-xs">{role}</p>
           </div>
         </div>

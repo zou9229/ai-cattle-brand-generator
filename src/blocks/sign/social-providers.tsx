@@ -67,7 +67,7 @@ export function SocialProviders({
           onClick={provider.onClick}
         >
           {provider.icon}
-          {provider.text}
+          {provider.title}
         </Button>
       ))}
     </div>

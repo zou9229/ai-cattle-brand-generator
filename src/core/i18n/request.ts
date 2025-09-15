@@ -2,29 +2,37 @@ import { getRequestConfig } from "next-intl/server";
 import { routing } from "./config";
 import {
   defaultLocale,
-  localeNamespaces,
-  localeRootNamespace,
+  localeMessagesPaths,
+  localeMessagesRootPath,
 } from "@/config/locale";
 
 export async function loadMessages(
-  namespace: string = localeRootNamespace,
+  path: string,
   locale: string = defaultLocale
 ) {
   try {
+    // try to load locale messages
     const messages = await import(
-      `@/config/locale/${namespace}/${locale}.json`
+      `@/config/locale/messages/${locale}/${path}.json`
     );
     return messages.default;
-  } catch (error) {
-    return await import(
-      `@/config/locale/${namespace}/${defaultLocale}.json`
-    ).then((module) => module.default);
+  } catch (e) {
+    try {
+      // try to load default locale messages
+      const messages = await import(
+        `@/config/locale/messages/${defaultLocale}/${path}.json`
+      );
+      return messages.default;
+    } catch (err) {
+      // if default locale is not found, return empty object
+      return {};
+    }
   }
 }
 
 export default getRequestConfig(async ({ requestLocale }) => {
   let locale = await requestLocale;
-  if (!locale || !routing.locales.includes(locale as any)) {
+  if (!locale || !routing.locales.includes(locale as string)) {
     locale = routing.defaultLocale;
   }
 
@@ -32,31 +40,39 @@ export default getRequestConfig(async ({ requestLocale }) => {
     locale = "zh";
   }
 
-  if (!routing.locales.includes(locale as any)) {
-    locale = "en";
-  }
-
   try {
+    // load all local messages
     const allMessages = await Promise.all(
-      localeNamespaces.map((namespace) => loadMessages(namespace, locale))
+      localeMessagesPaths.map((path) => loadMessages(path, locale))
     );
-    const messagesMap: any = {};
-    localeNamespaces.forEach((namespace, index) => {
-      messagesMap[namespace] = allMessages[index];
+
+    // merge all local messages
+    const messages: any = {};
+
+    localeMessagesPaths.forEach((path, index) => {
+      const localMessages = allMessages[index];
+
+      const keys = path.split("/");
+      let current = messages;
+
+      for (let i = 0; i < keys.length - 1; i++) {
+        if (!current[keys[i]]) {
+          current[keys[i]] = {};
+        }
+        current = current[keys[i]];
+      }
+
+      current[keys[keys.length - 1]] = localMessages;
     });
 
     return {
-      locale: locale,
-      messages: {
-        ...messagesMap,
-        ...(await loadMessages(localeRootNamespace, locale)),
-      },
+      locale,
+      messages,
     };
   } catch (e) {
-    console.log("yyy", localeRootNamespace, defaultLocale);
     return {
       locale: defaultLocale,
-      messages: await loadMessages(localeRootNamespace, defaultLocale),
+      messages: await loadMessages(localeMessagesRootPath, defaultLocale),
     };
   }
 });

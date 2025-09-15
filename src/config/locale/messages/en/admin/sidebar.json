@@ -1,0 +1,64 @@
+{
+  "brand": {
+    "title": "ShipAny",
+    "logo": {
+      "src": "/logo.png",
+      "alt": "ShipAny"
+    },
+    "url": "/admin"
+  },
+  "navs": [
+    {
+      "items": [
+        {
+          "title": "Users",
+          "url": "/admin/users",
+          "icon": "RiUserLine"
+        }
+      ]
+    },
+    {
+      "title": "CMS",
+      "items": [
+        {
+          "title": "Categories",
+          "icon": "RiFolderLine",
+          "url": "/admin/categories"
+        },
+        {
+          "title": "Posts",
+          "icon": "RiFileTextLine",
+          "url": "/admin/posts"
+        }
+      ]
+    }
+  ],
+  "bottom_nav": {
+    "items": [
+      {
+        "title": "Settings",
+        "url": "/admin/settings/auth",
+        "icon": "RiSettingsLine"
+      },
+      {
+        "title": "Home",
+        "url": "/",
+        "icon": "RiHomeLine",
+        "target": "_blank"
+      }
+    ]
+  },
+  "user_nav": {
+    "items": [
+      {
+        "title": "Settings",
+        "url": "/admin/settings/ai"
+      },
+      {
+        "title": "Billing",
+        "url": "/admin/billing"
+      }
+    ]
+  },
+  "variant": "inset"
+}

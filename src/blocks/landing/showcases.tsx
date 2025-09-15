@@ -8,13 +8,16 @@ import { Showcases as ShowcasesType } from "@/types/blocks/landing";
 export function Showcases({
   showcases,
   className,
+  srOnlyTitle,
 }: {
   showcases: ShowcasesType;
   className?: string;
+  srOnlyTitle?: string;
 }) {
   return (
     <section className={cn("py-16 md:py-24", showcases.className, className)}>
       <div className="mx-auto mb-12 text-center">
+        {srOnlyTitle && <h1 className="sr-only">{srOnlyTitle}</h1>}
         <h2 className="mb-6 text-pretty text-3xl font-bold lg:text-4xl">
           {showcases.title}
         </h2>

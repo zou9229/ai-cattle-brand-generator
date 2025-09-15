@@ -7,7 +7,26 @@ compatibility_flags = ["nodejs_compat"]
 binding = "ASSETS"
 directory = ".open-next/assets"
 
+[[hyperdrive]]
+binding = "HYPERDRIVE"
+id = ""
+localConnectionString = ""
+
 [observability]
 enabled = true
 
 [vars]
+# app
+NEXT_PUBLIC_APP_URL = ""
+NEXT_PUBLIC_APP_NAME = ""
+
+# theme
+NEXT_PUBLIC_DEFAULT_THEME = "light"
+
+# database
+DATABASE_URL = ""
+DATABASE_PROVIDER = "postgresql"
+
+# auth
+AUTH_URL = ""
+AUTH_SECRET = ""

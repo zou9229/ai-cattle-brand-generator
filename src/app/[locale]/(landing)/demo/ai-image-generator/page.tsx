@@ -1,6 +1,11 @@
 import { FAQ, CTA, Hero, Showcases } from "@/blocks/landing";
 import { ImageGenerator } from "@/blocks/generator/image-generator";
 import { getTranslations } from "next-intl/server";
+import { getMetadata } from "@/lib/seo";
+
+export const generateMetadata = getMetadata({
+  metadataKey: "demo.ai-image-generator",
+});
 
 export default async function ImageGeneratorPage() {
   const t = await getTranslations("landing");

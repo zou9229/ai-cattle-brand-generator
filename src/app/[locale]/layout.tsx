@@ -1,26 +1,13 @@
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { notFound } from "next/navigation";
 import { routing } from "@/core/i18n/config";
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { setRequestLocale } from "next-intl/server";
 import { ThemeProvider } from "@/core/theme/provider";
 import { AppContextProvider } from "@/contexts/app";
 import { Toaster } from "@/components/ui/sonner";
+import { defaultMetadata } from "@/lib/seo";
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
-  const { locale } = await params;
-  setRequestLocale(locale);
-
-  const messages = await getTranslations("metadata");
-
-  return {
-    title: messages("title"),
-    description: messages("description"),
-  };
-}
+export const generateMetadata = defaultMetadata;
 
 export default async function LocaleLayout({
   children,

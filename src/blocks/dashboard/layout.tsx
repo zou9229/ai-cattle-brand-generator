@@ -1,14 +1,14 @@
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { type Dashboard as DashboardType } from "@/types/blocks/dashboard";
+import { Sidebar as SidebarType } from "@/types/blocks/dashboard";
 import { ReactNode } from "react";
 import { Sidebar } from "./sidebar";
 
 export function DashboardLayout({
   children,
-  dashboard,
+  sidebar,
 }: {
   children: ReactNode;
-  dashboard: DashboardType;
+  sidebar: SidebarType;
 }) {
   return (
     <SidebarProvider
@@ -19,11 +19,8 @@ export function DashboardLayout({
         } as React.CSSProperties
       }
     >
-      {dashboard.sidebar && (
-        <Sidebar
-          variant={dashboard.sidebar.variant || "inset"}
-          sidebar={dashboard.sidebar}
-        />
+      {sidebar && (
+        <Sidebar variant={sidebar.variant || "inset"} sidebar={sidebar} />
       )}
       <SidebarInset>{children}</SidebarInset>
     </SidebarProvider>

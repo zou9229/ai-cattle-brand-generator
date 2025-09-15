@@ -38,7 +38,10 @@ export function SignUser({
       <DropdownMenu>
         <DropdownMenuTrigger>
           <Avatar>
-            <AvatarImage src={session.user.image || ""} />
+            <AvatarImage
+              src={session.user.image || ""}
+              alt={session.user.name || ""}
+            />
             <AvatarFallback>{session.user.name.charAt(0)}</AvatarFallback>
           </Avatar>
         </DropdownMenuTrigger>

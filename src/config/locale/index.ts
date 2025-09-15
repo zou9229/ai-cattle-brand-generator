@@ -11,6 +11,13 @@ export const localePrefix = "as-needed";
 
 export const localeDetection = false;
 
-export const localeRootNamespace = "messages";
+export const localeMessagesRootPath = "@/config/locale/messages";
 
-export const localeNamespaces = ["landing", "admin", "demo"];
+export const localeMessagesPaths = [
+  "common",
+  "landing",
+  "demo",
+  "showcases",
+  "admin/sidebar",
+  "admin/user",
+];

@@ -25,6 +25,9 @@ export function Stats({
         <div className="grid gap-12 divide-y *:text-center md:grid-cols-3 md:gap-2 md:divide-x md:divide-y-0">
           {stats.items?.map((item, idx) => (
             <div className="space-y-4" key={idx}>
+              <h3 className="sr-only">
+                {item.title} {item.description}
+              </h3>
               <div className="text-5xl font-bold text-primary">
                 {item.title}
               </div>

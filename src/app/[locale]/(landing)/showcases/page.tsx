@@ -1,6 +1,12 @@
-import { Hero, Showcases } from "@/blocks/landing";
+import { CTA, Showcases } from "@/blocks/landing";
+import { getMetadata } from "@/lib/seo";
 import { getTranslations } from "next-intl/server";
 import { setRequestLocale } from "next-intl/server";
+
+export const generateMetadata = getMetadata({
+  metadataKey: "showcases",
+  canonicalUrl: "/showcases",
+});
 
 export default async function ShowcasesPage({
   params,
@@ -11,18 +17,17 @@ export default async function ShowcasesPage({
   setRequestLocale(locale);
 
   const t = await getTranslations("landing");
-  const tt = await getTranslations("demo.showcases");
+  const tt = await getTranslations("showcases");
 
   return (
     <>
-      <Hero
-        hero={{
-          title: tt.raw("title"),
-          description: tt.raw("description"),
-          buttons: tt.raw("buttons"),
-        }}
+      <Showcases
+        showcases={t.raw("showcases")}
+        srOnlyTitle={tt.raw("title")}
+        className="md:py-36"
       />
-      <Showcases showcases={t.raw("showcases")} />
+
+      <CTA cta={t.raw("cta")} className="bg-muted" />
     </>
   );
 }

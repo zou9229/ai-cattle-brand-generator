@@ -5,10 +5,10 @@ import { getUsers } from "@/services/user";
 import { getTranslations } from "next-intl/server";
 
 export default async function AdminUsersPage() {
-  const t = await getTranslations("admin.users");
+  const t = await getTranslations("admin.user.list");
 
   const users = await getUsers();
-  console.log(users);
+
   const table: Table = {
     columns: [
       { name: "id", title: "ID", type: "copy" },
