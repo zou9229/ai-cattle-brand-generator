@@ -7,6 +7,6 @@ export const envConfigs = {
   adsense_code: process.env.NEXT_PUBLIC_ADSENSE_CODE ?? "",
   database_url: process.env.DATABASE_URL ?? "",
   database_provider: process.env.DATABASE_PROVIDER ?? "postgresql",
-  auth_url: process.env.AUTH_URL ?? "",
-  auth_secret: process.env.AUTH_SECRET ?? "",
+  auth_url: process.env.AUTH_URL || process.env.NEXT_PUBLIC_APP_URL || "",
+  auth_secret: process.env.AUTH_SECRET ?? "", // openssl rand -base64 32
 };

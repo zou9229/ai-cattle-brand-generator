@@ -7,6 +7,7 @@ import * as schema from "@/config/db/schema";
 
 // auth options
 export const authOptions = {
+  appName: envConfigs.app_name,
   baseURL: envConfigs.auth_url,
   secret: envConfigs.auth_secret,
   database: drizzleAdapter(db(), {
