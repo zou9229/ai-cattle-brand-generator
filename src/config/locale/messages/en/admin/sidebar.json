@@ -1,19 +1,23 @@
 {
-  "brand": {
-    "title": "ShipAny",
-    "logo": {
-      "src": "/logo.png",
-      "alt": "ShipAny"
+  "header": {
+    "brand": {
+      "title": "ShipAny",
+      "logo": {
+        "src": "/logo.png",
+        "alt": "ShipAny"
+      },
+      "url": "/admin"
     },
-    "url": "/admin"
+    "show_trigger": true
   },
-  "navs": [
+  "main_navs": [
     {
+      "title": "RBAC",
       "items": [
         {
           "title": "Users",
           "url": "/admin/users",
-          "icon": "RiUserLine"
+          "icon": "User"
         }
       ]
     },
@@ -22,13 +26,33 @@
       "items": [
         {
           "title": "Categories",
-          "icon": "RiFolderLine",
+          "icon": "Folder",
           "url": "/admin/categories"
         },
         {
           "title": "Posts",
-          "icon": "RiFileTextLine",
+          "icon": "FileText",
           "url": "/admin/posts"
+        }
+      ]
+    },
+    {
+      "title": "Payments & Credits",
+      "items": [
+        {
+          "title": "Payments",
+          "url": "/admin/payments",
+          "icon": "DollarSign"
+        },
+        {
+          "title": "Subscriptions",
+          "url": "/admin/subscriptions",
+          "icon": "CreditCard"
+        },
+        {
+          "title": "Credits",
+          "url": "/admin/credits",
+          "icon": "Coins"
         }
       ]
     }
@@ -38,27 +62,55 @@
       {
         "title": "Settings",
         "url": "/admin/settings/auth",
-        "icon": "RiSettingsLine"
+        "icon": "Settings"
       },
       {
-        "title": "Home",
-        "url": "/",
-        "icon": "RiHomeLine",
-        "target": "_blank"
+        "title": "API Keys",
+        "url": "/admin/api-keys",
+        "icon": "Key"
       }
     ]
   },
-  "user_nav": {
-    "items": [
-      {
-        "title": "Settings",
-        "url": "/admin/settings/ai"
-      },
-      {
-        "title": "Billing",
-        "url": "/admin/billing"
-      }
-    ]
+  "user": {
+    "nav": {
+      "items": [
+        {
+          "title": "Profile",
+          "url": "/settings/profile",
+          "icon": "User",
+          "target": "_blank"
+        },
+        {
+          "title": "Security",
+          "url": "/settings/security",
+          "icon": "Lock",
+          "target": "_blank"
+        }
+      ]
+    },
+    "show_email": true,
+    "show_signout": true,
+    "signout_callback": "/"
   },
-  "variant": "inset"
+  "footer": {
+    "nav": {
+      "items": [
+        {
+          "title": "Home",
+          "url": "/",
+          "icon": "Home",
+          "target": "_blank"
+        },
+        {
+          "title": "GitHub",
+          "url": "https://github.com/shipanyai/shipany-template-two",
+          "icon": "Github",
+          "target": "_blank"
+        }
+      ]
+    },
+    "show_theme": true,
+    "show_locale": true
+  },
+  "variant": "sidebar"
 }

@@ -3,35 +3,44 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarHeader as SidebarHeaderComponent,
+  SidebarTrigger,
+  useSidebar,
 } from "@/shared/components/ui/sidebar";
 import { Link } from "@/core/i18n/navigation";
 import Image from "next/image";
-import { Brand } from "@/shared/types/blocks/common";
+import { SidebarHeader as SidebarHeaderType } from "@/shared/types/blocks/dashboard";
 
-export function SidebarHeader({ brand }: { brand: Brand }) {
+export function SidebarHeader({ header }: { header: SidebarHeaderType }) {
+  const { open } = useSidebar();
   return (
     <SidebarHeaderComponent className="mb-4">
       <SidebarMenu>
-        <SidebarMenuItem>
-          <SidebarMenuButton
-            asChild
-            className="data-[slot=sidebar-menu-button]:!p-1.5"
-          >
-            {brand && (
-              <Link href={brand.url as string}>
-                {brand.logo && (
-                  <Image
-                    src={brand.logo.src}
-                    alt={brand.logo.alt || ""}
-                    width={100}
-                    height={100}
-                    className="h-10 w-auto"
-                  />
-                )}
-                <span className="text-base font-semibold">{brand.title}</span>
-              </Link>
-            )}
-          </SidebarMenuButton>
+        <SidebarMenuItem className="flex items-center justify-between">
+          {(open || !header.show_trigger) && (
+            <SidebarMenuButton
+              asChild
+              className="data-[slot=sidebar-menu-button]:!p-1.5"
+            >
+              {header.brand && (
+                <Link href={header.brand.url || ""}>
+                  {header.brand.logo && (
+                    <Image
+                      src={header.brand.logo.src}
+                      alt={header.brand.logo.alt || ""}
+                      width={80}
+                      height={80}
+                      className="h-6 w-auto"
+                    />
+                  )}
+                  <span className="text-base font-semibold">
+                    {header.brand.title}
+                  </span>
+                </Link>
+              )}
+            </SidebarMenuButton>
+          )}
+          <div className="flex-1"></div>
+          {header.show_trigger && <SidebarTrigger />}
         </SidebarMenuItem>
       </SidebarMenu>
     </SidebarHeaderComponent>

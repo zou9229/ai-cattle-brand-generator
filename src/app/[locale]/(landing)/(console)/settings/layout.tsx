@@ -24,10 +24,10 @@ export default async function SettingsLayout({
         is_active: pathname === "/settings/profile",
       },
       {
-        title: "Account",
-        url: "/settings/account",
+        title: "Security",
+        url: "/settings/security",
         icon: "Lock",
-        is_active: pathname === "/settings/account",
+        is_active: pathname === "/settings/security",
       },
       {
         title: "Payments",

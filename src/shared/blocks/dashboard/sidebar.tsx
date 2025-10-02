@@ -1,18 +1,17 @@
 "use client";
 
 import * as React from "react";
-import { IconInnerShadowTop } from "@tabler/icons-react";
 
 import {
   Sidebar as SidebarComponent,
   SidebarContent,
-  SidebarFooter,
+  SidebarFooter as SidebarFooterComponent,
 } from "@/shared/components/ui/sidebar";
-import { Link } from "@/core/i18n/navigation";
 import { type Sidebar as SidebarType } from "@/shared/types/blocks/dashboard";
 import { Nav } from "./nav";
-import { SignUser } from "./sign-user";
+import { SidebarUser } from "./sidebar-user";
 import { SidebarHeader } from "./sidebar-header";
+import { SidebarFooter } from "./sidebar-footer";
 
 export function Sidebar({
   sidebar,
@@ -21,25 +20,19 @@ export function Sidebar({
   sidebar: SidebarType;
 }) {
   return (
-    <SidebarComponent collapsible="offcanvas" {...props}>
-      {sidebar.brand && <SidebarHeader brand={sidebar.brand} />}
+    <SidebarComponent collapsible={sidebar.collapsible || "icon"} {...props}>
+      {sidebar.header && <SidebarHeader header={sidebar.header} />}
       <SidebarContent>
-        {sidebar.navs &&
-          sidebar.navs.map((nav, idx) => <Nav key={idx} nav={nav} />)}
+        {sidebar.main_navs &&
+          sidebar.main_navs.map((nav, idx) => <Nav key={idx} nav={nav} />)}
         {sidebar.bottom_nav && (
           <Nav nav={sidebar.bottom_nav} className="mt-auto" />
         )}
-        {/* {data.main_nav && <SidebarNav data={data.main_nav} />}
-        {data.bottom_nav && (
-          <SidebarNav data={data.bottom_nav} className="mt-auto" />
-        )} */}
-        {/* <NavMain items={data.navMain} />
-        <NavDocuments items={data.documents} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
       </SidebarContent>
-      <SidebarFooter>
-        <SignUser nav={sidebar.bottom_nav || { items: [] }} />
-      </SidebarFooter>
+      <SidebarFooterComponent>
+        {sidebar.user && <SidebarUser user={sidebar.user} />}
+        {sidebar.footer && <SidebarFooter footer={sidebar.footer} />}
+      </SidebarFooterComponent>
     </SidebarComponent>
   );
 }

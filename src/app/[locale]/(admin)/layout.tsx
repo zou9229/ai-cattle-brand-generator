@@ -1,8 +1,11 @@
 import { ReactNode } from "react";
-import { DashboardLayout } from "@/shared/blocks/dashboard/layout";
-import { loadMessages } from "@/core/i18n/request";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { DashboardLayout } from "@/shared/blocks/dashboard/layout";
+import { Sidebar as SidebarType } from "@/shared/types/blocks/dashboard";
 
+/**
+ * Admin layout to manage datas
+ */
 export default async function AdminLayout({
   children,
   params,
@@ -15,7 +18,7 @@ export default async function AdminLayout({
 
   const t = await getTranslations("admin");
 
-  return (
-    <DashboardLayout sidebar={t.raw("sidebar")}>{children}</DashboardLayout>
-  );
+  const sidebar: SidebarType = t.raw("sidebar");
+
+  return <DashboardLayout sidebar={sidebar}>{children}</DashboardLayout>;
 }

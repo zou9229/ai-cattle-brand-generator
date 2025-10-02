@@ -5,7 +5,7 @@ import {
   AvatarFallback,
   AvatarImage,
 } from "@/shared/components/ui/avatar";
-import { ChevronsUpDown, LogOut } from "lucide-react";
+import { ChevronsUpDown, Loader2, LogOut } from "lucide-react";
 import { Link } from "@/core/i18n/navigation";
 import { signOut, useSession } from "@/core/auth/client";
 import { useRouter } from "next/navigation";
@@ -29,28 +29,30 @@ import {
 import { Button } from "@/shared/components/ui/button";
 import { Fragment } from "react";
 import { NavItem, Nav as NavType } from "@/shared/types/blocks/common";
+import { SidebarUser as SidebarUserType } from "@/shared/types/blocks/dashboard";
+import { SmartIcon } from "../common";
 
-export function SignUser({ nav }: { nav: NavType }) {
+export function SidebarUser({ user }: { user: SidebarUserType }) {
   const { data: session, isPending } = useSession();
   const { isMobile, open } = useSidebar();
   const router = useRouter();
 
   const handleSignOut = async () => {
     await signOut();
-    router.push("/sign-in");
+    router.push(user.signout_callback || "/sign-in");
   };
 
   return (
     <>
       {session?.user ? (
         <SidebarMenu className="gap-4">
-          {!open && (
+          {/* {!open && (
             <SidebarMenuItem>
               <SidebarMenuButton className="cursor-pointer" asChild>
                 <SidebarTrigger />
               </SidebarMenuButton>
             </SidebarMenuItem>
-          )}
+          )} */}
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -73,9 +75,11 @@ export function SignUser({ nav }: { nav: NavType }) {
                     <span className="truncate font-semibold">
                       {session?.user?.name}
                     </span>
-                    <span className="truncate text-xs">
-                      {/* {session?.user?.email} */}
-                    </span>
+                    {user.show_email && (
+                      <span className="truncate text-xs">
+                        {session?.user?.email}
+                      </span>
+                    )}
                   </div>
                   <ChevronsUpDown className="ml-auto size-4" />
                 </SidebarMenuButton>
@@ -99,15 +103,17 @@ export function SignUser({ nav }: { nav: NavType }) {
                       <span className="truncate font-semibold">
                         {session?.user?.name}
                       </span>
-                      <span className="truncate text-xs">
-                        {/* {session?.user?.email} */}
-                      </span>
+                      {user.show_email && (
+                        <span className="truncate text-xs">
+                          {session?.user?.email}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
-                  {nav.items.map((item: NavItem | undefined) => (
+                  {user.nav?.items.map((item: NavItem | undefined) => (
                     <Fragment key={item?.title || item?.title}>
                       <DropdownMenuItem className="cursor-pointer">
                         <Link
@@ -115,7 +121,9 @@ export function SignUser({ nav }: { nav: NavType }) {
                           target={item?.target}
                           className="w-full flex items-center gap-2"
                         >
-                          {item?.icon && item?.icon}
+                          {item?.icon && (
+                            <SmartIcon name={item.icon as string} />
+                          )}
                           {item?.title || ""}
                         </Link>
                       </DropdownMenuItem>
@@ -138,17 +146,23 @@ export function SignUser({ nav }: { nav: NavType }) {
         <>
           {open ? (
             <div className="flex justify-center items-center h-full px-4 py-4">
-              <Button className="w-full" onClick={() => {}}>
-                Sign in
-              </Button>
+              {isPending ? (
+                <div className="w-full flex justify-center items-center">
+                  <Loader2 className="animate-spin" />
+                </div>
+              ) : (
+                <Button className="w-full" onClick={() => {}}>
+                  Sign in
+                </Button>
+              )}
             </div>
           ) : (
             <SidebarMenu>
-              <SidebarMenuItem>
+              {/* <SidebarMenuItem>
                 <SidebarMenuButton className="cursor-pointer" asChild>
                   <SidebarTrigger />
                 </SidebarMenuButton>
-              </SidebarMenuItem>
+              </SidebarMenuItem> */}
               {/* <SidebarMenuItem>
                 <SidebarMenuButton
                   className="cursor-pointer"
