@@ -2,18 +2,46 @@
 
 ## Getting Started
 
-First, run the development server:
+1. Clone code and install
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```shell
+git clone git@github.com:shipanyai/shipany-template-two -b dev my-shipany-project
+cd my-shipany-project
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Set local development env
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+create `.env` file under root dir
+
+```shell
+cp .env.example .env
+```
+
+update env with DATABASE_URL and AUTH_SECRET
+
+`DATABASE_URL` may like:
+
+```shell
+postgresql://user:password@host:port/db
+```
+
+`AUTH_SECRET` can be generated:
+
+- [Generate Auth Secret](https://www.better-auth.com/docs/installation)
+
+3. Create database tables with orm migrate
+
+```shell
+pnpm db:migrate
+```
+
+4. Start dev server
+
+```shell
+pnpm dev
+```
+
+5. Deploy to vercel
+
+push code to github and deploy to Vercel.
