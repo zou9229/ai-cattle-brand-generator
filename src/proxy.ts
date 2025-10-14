@@ -42,7 +42,7 @@ export async function proxy(request: NextRequest) {
         }
       );
 
-      console.log("session in proxy", session, baseURL);
+      // console.log("session in proxy", session, baseURL);
 
       if (!session) {
         // Redirect to sign-in page with locale and callback URL

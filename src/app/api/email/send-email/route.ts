@@ -1,10 +1,12 @@
 import { respData, respErr } from "@/shared/lib/resp";
-import { emailService } from "@/shared/services/email";
+import { getEmailService } from "@/shared/services/email";
 import { VerificationCode } from "@/shared/blocks/email/verification-code";
 
 export async function POST(req: Request) {
   try {
     const { emails, subject } = await req.json();
+
+    const emailService = await getEmailService();
 
     const result = await emailService.sendEmail({
       to: emails,

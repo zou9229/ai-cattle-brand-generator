@@ -1,7 +1,14 @@
-import { getAuthOptions } from "@/core/auth/config";
-import { betterAuth } from "better-auth";
+import { getAuth } from "@/core/auth";
 import { toNextJsHandler } from "better-auth/next-js";
 
-export const auth = betterAuth(await getAuthOptions());
+export async function POST(request: Request) {
+  const auth = await getAuth();
+  const handler = toNextJsHandler(auth.handler);
+  return handler.POST(request);
+}
 
-export const { POST, GET } = toNextJsHandler(auth.handler);
+export async function GET(request: Request) {
+  const auth = await getAuth();
+  const handler = toNextJsHandler(auth.handler);
+  return handler.GET(request);
+}

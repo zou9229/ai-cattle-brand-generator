@@ -2,9 +2,9 @@ import { EmailManager, ResendProvider } from "@/extensions/email";
 import { Configs, getAllConfigs } from "@/shared/services/config";
 
 /**
- * get email service for sending email
+ * get email service with configs
  */
-export function getEmailService(configs: Configs) {
+export function getEmailServiceWithConfigs(configs: Configs) {
   const emailManager = new EmailManager();
 
   if (configs.resend_api_key) {
@@ -20,6 +20,17 @@ export function getEmailService(configs: Configs) {
 }
 
 /**
- * default email service
+ * global email service
  */
-export const emailService = getEmailService(await getAllConfigs());
+let emailService: EmailManager | null = null;
+
+/**
+ * get email service instance
+ */
+export async function getEmailService(): Promise<EmailManager> {
+  if (!emailService) {
+    const configs = await getAllConfigs();
+    emailService = getEmailServiceWithConfigs(configs);
+  }
+  return emailService;
+}
