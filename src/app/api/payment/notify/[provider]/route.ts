@@ -43,6 +43,8 @@ export async function POST(
       throw new Error('payment session not found');
     }
 
+    // console.log('notify payment session', session);
+
     if (eventType === PaymentEventType.CHECKOUT_SUCCESS) {
       // one-time payment or subscription first payment
       const orderNo = session.metadata.order_no;

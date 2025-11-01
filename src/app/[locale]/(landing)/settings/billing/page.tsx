@@ -56,7 +56,12 @@ export default async function BillingPage({
       {
         name: 'interval',
         title: t('fields.interval'),
-        type: 'label',
+        callback: function (item) {
+          if (!item.interval || !item.intervalCount) {
+            return '-';
+          }
+          return <div>{`${item.intervalCount}-${item.interval}`}</div>;
+        },
       },
       {
         name: 'status',
@@ -72,6 +77,8 @@ export default async function BillingPage({
           let prefix = '';
           if (currency === 'USD') {
             prefix = `$`;
+          } else if (currency === 'EUR') {
+            prefix = `€`;
           } else if (currency === 'CNY') {
             prefix = `¥`;
           } else {
@@ -158,7 +165,10 @@ export default async function BillingPage({
         size: 'sm',
       },
     ];
-    if (currentSubscription.paymentUserId) {
+    if (
+      currentSubscription.paymentUserId &&
+      currentSubscription.paymentProvider === 'stripe'
+    ) {
       buttons.push({
         title: t('view.buttons.manage'),
         url: `/settings/billing/retrieve?subscription_no=${currentSubscription.subscriptionNo}`,
@@ -193,7 +203,8 @@ export default async function BillingPage({
         </div>
         {currentSubscription ? (
           <>
-            {currentSubscription?.status === SubscriptionStatus.ACTIVE ? (
+            {currentSubscription?.status === SubscriptionStatus.ACTIVE ||
+            currentSubscription?.status === SubscriptionStatus.TRIALING ? (
               <div className="text-muted-foreground mt-4 text-sm font-normal">
                 {t('view.tip', {
                   date: moment(currentSubscription?.currentPeriodEnd).format(

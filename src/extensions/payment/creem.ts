@@ -3,11 +3,15 @@ import {
   PaymentConfigs,
   PaymentCustomField,
   PaymentEvent,
+  PaymentEventType,
   PaymentInterval,
   PaymentOrder,
   PaymentProvider,
   PaymentSession,
   PaymentStatus,
+  SubscriptionCycleType,
+  SubscriptionInfo,
+  SubscriptionStatus,
 } from '.';
 
 /**
@@ -119,60 +123,7 @@ export class CreemProvider implements PaymentProvider {
         throw new Error(session.error || 'get payment failed');
       }
 
-      let subscription: any | undefined = undefined;
-      let billingUrl = '';
-
-      if (session.subscription) {
-        subscription = session.subscription;
-      }
-
-      const result: PaymentSession = {
-        provider: this.name,
-        paymentStatus: this.mapCreemStatus(session),
-        paymentInfo: {
-          discountCode: '',
-          discountAmount: undefined,
-          discountCurrency: undefined,
-          paymentAmount: session.order.amount_paid || 0,
-          paymentCurrency: session.order.currency || '',
-          paymentEmail: session.customer?.email || undefined,
-          paidAt: session.order.updated_at
-            ? new Date(session.order.updated_at)
-            : undefined,
-        },
-        paymentResult: session,
-        metadata: session.metadata,
-      };
-
-      if (subscription) {
-        result.subscriptionId = subscription.id;
-
-        result.subscriptionInfo = {
-          subscriptionId: subscription.id,
-          productId: session.product?.id,
-          planId: '',
-          description: session.product?.description || '',
-          amount: session.order.amount_paid || 0,
-          currency: session.order.currency,
-          currentPeriodStart: new Date(subscription.current_period_start_date),
-          currentPeriodEnd: new Date(subscription.current_period_end_date),
-          interval:
-            session.product?.billing_period === 'every-month'
-              ? PaymentInterval.MONTH
-              : subscription.product?.billing_period === 'every-year'
-                ? PaymentInterval.YEAR
-                : subscription.product?.billing_period === 'every-week'
-                  ? PaymentInterval.WEEK
-                  : subscription.product?.billing_period === 'every-day'
-                    ? PaymentInterval.DAY
-                    : undefined,
-          intervalCount: 1,
-          billingUrl: billingUrl,
-        };
-        result.subscriptionResult = subscription;
-      }
-
-      return result;
+      return await this.buildPaymentSessionFromCheckoutSession(session);
     } catch (error) {
       throw error;
     }
@@ -202,14 +153,33 @@ export class CreemProvider implements PaymentProvider {
 
       // parse the webhook payload
       const event = JSON.parse(rawBody);
+
       if (!event || !event.eventType) {
         throw new Error('Invalid webhook payload');
       }
 
+      let paymentSession: PaymentSession | undefined = undefined;
+
+      const eventType = this.mapCreemEventType(event.eventType);
+
+      if (eventType === PaymentEventType.CHECKOUT_SUCCESS) {
+        paymentSession = await this.buildPaymentSessionFromCheckoutSession(
+          event.object as any
+        );
+      } else if (eventType === PaymentEventType.PAYMENT_SUCCESS) {
+        paymentSession = await this.buildPaymentSessionFromSubscription(
+          event.object as any
+        );
+      }
+
+      if (!paymentSession) {
+        throw new Error('Invalid webhook event');
+      }
+
       return {
-        eventType: event.eventType,
+        eventType: eventType,
         eventResult: event,
-        paymentSession: undefined,
+        paymentSession: paymentSession,
       };
     } catch (error) {
       throw error;
@@ -268,24 +238,225 @@ export class CreemProvider implements PaymentProvider {
     return await response.json();
   }
 
+  private mapCreemEventType(eventType: string): PaymentEventType {
+    switch (eventType) {
+      case 'checkout.completed':
+        return PaymentEventType.CHECKOUT_SUCCESS;
+      case 'subscription.paid':
+        // todo: paied
+        return PaymentEventType.PAYMENT_SUCCESS;
+      case 'invoice.payment_failed':
+        // todo: subscription paid faied
+        return PaymentEventType.PAYMENT_FAILED;
+      case 'subscription.update':
+        // todo: subscription updated
+        return PaymentEventType.SUBSCRIBE_UPDATED;
+      case 'subscription.canceled':
+        // todo: subscription canceled
+        return PaymentEventType.SUBSCRIBE_CANCELED;
+      default:
+        throw new Error(`Not handle creem event type: ${eventType}`);
+    }
+  }
+
   private mapCreemStatus(session: any): PaymentStatus {
     const status = session.status;
+    const order = session.order || session.last_transaction;
+    const orderStatus = order?.status;
 
-    switch (status) {
-      case 'pending':
-        return PaymentStatus.PROCESSING;
-      case 'processing':
-        return PaymentStatus.PROCESSING;
-      case 'completed':
-      case 'paid':
-        return PaymentStatus.SUCCESS;
-      case 'failed':
-        return PaymentStatus.FAILED;
-      case 'canceled':
-      case 'expired':
-        return PaymentStatus.CANCELED;
+    if (orderStatus === 'paid') {
+      return PaymentStatus.SUCCESS;
+    } else {
+      // todo: handle other status
+      throw new Error(`Unknown Creem session status: ${status}`);
+    }
+  }
+
+  // build payment session from checkout session
+  private async buildPaymentSessionFromCheckoutSession(
+    session: any
+  ): Promise<PaymentSession> {
+    let subscription: any | undefined = undefined;
+    let billingUrl = '';
+
+    if (session.subscription) {
+      subscription = session.subscription;
+    }
+
+    const order = session.order;
+
+    const result: PaymentSession = {
+      provider: this.name,
+      paymentStatus: this.mapCreemStatus(session),
+      paymentInfo: {
+        transactionId: order?.transaction || order?.id,
+        amount: order?.amount || 0,
+        currency: order?.currency || '',
+        discountCode: '',
+        discountAmount: order?.discount_amount || 0,
+        discountCurrency: order?.currency || '',
+        paymentAmount: order?.amount_paid || 0,
+        paymentCurrency: order?.currency || '',
+        paymentEmail: session.customer?.email,
+        paymentUserName: session.customer?.name,
+        paymentUserId: session.customer?.id,
+        paidAt: order?.created_at ? new Date(order.created_at) : undefined,
+        invoiceId: '', // todo: invoice id
+        invoiceUrl: '',
+      },
+      paymentResult: session,
+      metadata: session.metadata,
+    };
+
+    if (subscription) {
+      result.subscriptionId = subscription.id;
+      result.subscriptionInfo = await this.buildSubscriptionInfo(
+        subscription,
+        session.product
+      );
+      result.subscriptionResult = subscription;
+    }
+
+    return result;
+  }
+
+  // build payment session from subscription session
+  private async buildPaymentSessionFromSubscription(
+    subscription: any
+  ): Promise<PaymentSession> {
+    const order = subscription.order || subscription.last_transaction;
+
+    const subscriptionCreatedAt = new Date(subscription.created_at);
+    const currentPeriodStartAt = new Date(
+      subscription.current_period_start_date
+    );
+    const timeDiff =
+      currentPeriodStartAt.getTime() - subscriptionCreatedAt.getTime();
+
+    const cycleType =
+      timeDiff < 5000 // 5s
+        ? SubscriptionCycleType.CREATE
+        : SubscriptionCycleType.RENEWAL;
+
+    const result: PaymentSession = {
+      provider: this.name,
+      paymentStatus: this.mapCreemStatus(subscription),
+      paymentInfo: {
+        description: order?.description,
+        amount: order?.amount || 0,
+        currency: order?.currency || '',
+        transactionId: order?.transaction || order?.id,
+        discountCode: '',
+        discountAmount: order?.discount_amount || 0,
+        discountCurrency: order?.currency || '',
+        paymentAmount: order?.amount_paid || 0,
+        paymentCurrency: order?.currency || '',
+        paymentEmail: subscription.customer?.email,
+        paymentUserName: subscription.customer?.name,
+        paymentUserId: subscription.customer?.id,
+        paidAt: order?.created_at ? new Date(order.created_at) : undefined,
+        invoiceId: '', // todo: invoice id
+        invoiceUrl: '',
+        subscriptionCycleType: cycleType,
+      },
+      paymentResult: subscription,
+      metadata: subscription.metadata,
+    };
+
+    if (subscription) {
+      result.subscriptionId = subscription.id;
+      result.subscriptionInfo = await this.buildSubscriptionInfo(
+        subscription,
+        subscription.product
+      );
+      result.subscriptionResult = subscription;
+    }
+
+    return result;
+  }
+
+  // build subscription info from subscription
+  private async buildSubscriptionInfo(
+    subscription: any,
+    product?: any
+  ): Promise<SubscriptionInfo> {
+    const { interval, count: intervalCount } = this.mapCreemInterval(product);
+
+    const subscriptionInfo: SubscriptionInfo = {
+      subscriptionId: subscription.id,
+      productId: product?.id,
+      planId: '',
+      description: product?.description,
+      amount: product?.price,
+      currency: product?.currency,
+      currentPeriodStart: new Date(subscription.current_period_start_date),
+      currentPeriodEnd: new Date(subscription.current_period_end_date),
+      interval: interval,
+      intervalCount: intervalCount,
+      metadata: subscription.metadata,
+    };
+
+    if (subscription.status === 'active') {
+      if (subscription.cancel_at) {
+        subscriptionInfo.status = SubscriptionStatus.PENDING_CANCEL;
+        // cancel apply at
+        subscriptionInfo.canceledAt = new Date(subscription.canceled_at);
+      } else {
+        subscriptionInfo.status = SubscriptionStatus.ACTIVE;
+      }
+    } else if (subscription.status === 'canceled') {
+      // subscription canceled
+      subscriptionInfo.status = SubscriptionStatus.CANCELED;
+      subscriptionInfo.canceledAt = new Date(subscription.canceled_at);
+    } else if (subscription.status === 'trialing') {
+      subscriptionInfo.status = SubscriptionStatus.TRIALING;
+    } else {
+      throw new Error(
+        `Unknown Creem subscription status: ${subscription.status}`
+      );
+    }
+
+    return subscriptionInfo;
+  }
+
+  private mapCreemInterval(product: any): {
+    interval: PaymentInterval;
+    count: number;
+  } {
+    if (!product || !product.billing_period) {
+      throw new Error('Invalid product');
+    }
+
+    switch (product.billing_period) {
+      case 'every-month':
+        return {
+          interval: PaymentInterval.MONTH,
+          count: 1,
+        };
+      case 'every-three-months':
+        return {
+          interval: PaymentInterval.MONTH,
+          count: 3,
+        };
+      case 'every-six-months':
+        return {
+          interval: PaymentInterval.MONTH,
+          count: 6,
+        };
+      case 'every-year':
+        return {
+          interval: PaymentInterval.YEAR,
+          count: 1,
+        };
+      case 'once':
+        return {
+          interval: PaymentInterval.ONE_TIME,
+          count: 1,
+        };
       default:
-        throw new Error(`Unknown Creem status: ${status}`);
+        throw new Error(
+          `Unknown Creem product billing period: ${product.billing_period}`
+        );
     }
   }
 }

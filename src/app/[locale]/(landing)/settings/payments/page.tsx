@@ -68,6 +68,8 @@ export default async function PaymentsPage({
           let prefix = '';
           if (currency === 'USD') {
             prefix = `$`;
+          } else if (currency === 'EUR') {
+            prefix = `€`;
           } else if (currency === 'CNY') {
             prefix = `¥`;
           } else {

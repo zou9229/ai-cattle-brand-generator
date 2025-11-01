@@ -18,6 +18,9 @@ export enum SubscriptionStatus {
   ACTIVE = 'active',
   CANCELED = 'canceled',
   PENDING_CANCEL = 'pending_cancel',
+  TRIALING = 'trialing',
+  EXPIRED = 'expired',
+  PAUSED = 'paused',
 }
 
 /**
@@ -155,6 +158,7 @@ export async function getCurrentSubscription(userId: string) {
         inArray(subscription.status, [
           SubscriptionStatus.ACTIVE,
           SubscriptionStatus.PENDING_CANCEL,
+          SubscriptionStatus.TRIALING,
         ])
       )
     )

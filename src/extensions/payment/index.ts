@@ -114,7 +114,10 @@ export enum SubscriptionCycleType {
  * Payment info interface
  */
 export interface PaymentInfo {
+  description?: string;
   transactionId?: string;
+  amount?: number;
+  currency?: string;
   discountCode?: string;
   discountAmount?: number;
   discountCurrency?: string;
@@ -133,6 +136,9 @@ export enum SubscriptionStatus {
   ACTIVE = 'active',
   PENDING_CANCEL = 'pending_cancel',
   CANCELED = 'canceled',
+  TRIALING = 'trialing',
+  EXPIRED = 'expired',
+  PAUSED = 'paused',
 }
 
 export interface SubscriptionInfo {

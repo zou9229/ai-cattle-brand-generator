@@ -54,6 +54,8 @@ export async function GET(req: Request) {
       sessionId: order.paymentSessionId,
     });
 
+    // console.log('callback payment session', session);
+
     await handleCheckoutSuccess({
       order,
       session,
